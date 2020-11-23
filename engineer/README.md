@@ -5,7 +5,7 @@ The goal of this question is to assess the candidate's familiarity with sequence
 Input: 
 
 - $3^{\prime}$ scaffold sequence: GTTTAAGAGCTAAGCTGGAAACAGCATAGCAAGTTTAAATAAGGCTAGTCCGTTATCAACTTGAAAAAGTGGCACCGAGTCGGTGCTTTTTTT;
-- U6 promoter sequence: TTTTTTG;
+- Promoter sequence: TTTTTTG;
 - text file of spacer sequences: `guide_RNA_seq.txt`;
 - fastq files of sequenced guide RNAs: `sequenced_guides.fastq`.   We can assume that we are only working with the actual sequence parts of the fastq files and ignore quality scores.
 
