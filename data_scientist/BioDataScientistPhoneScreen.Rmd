@@ -1,0 +1,24 @@
+---
+title: "Bio Data Scientist Phone Screen Questions"
+author: "Timothy Daley"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Questions
+
+## Please describe and walk us through a project, from formulation to completion, including how you collaborated with wet lab scientists
+
+This should be a slam dunk for most interviewees.  We should be looking for 
+
+- How was the project formulated?  
+
+- How did they communicate with cross-functional partners, i.e. wet lab scientists.  
+
+- What was their role?  How did they add value to the end goal?
+
+## Please describe a situation in which you had to communicate difficult ort disappointing results to cross-functional partners (e.g. wet lab scientists).  How did you communicate the results and how did they take it?
+
+The goal of this question is to determine how they can communicate issues to other teams.  We want our data scientist to be confident in their skills, be able to describe how they can back their convictions in their results with analysis, and how they communicate in difficut situations.
+
