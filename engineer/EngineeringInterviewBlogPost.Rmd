@@ -1,0 +1,152 @@
+---
+title: "Technical skills test for Bioinformatics Engineer at EpiC Bio"
+author: "Timothy Daley"
+date: "4/6/2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+A major problem in interviewing is how to make a practical and relevant test of the candidate's skills.  Especially for programming and data science.  This is why a lot of companies offload this test to known solutions such as LeetCode.  But this also goes the other way, in that the interview reflects on the values of the company to the candidate.  When I was interviewing, when I saw a company that uses a generic service for their test that was an indication that they had not put much thought into their practices.  The company that I ended up working for really impressed me with their interview, and that was one of the major reasons I took their offer.  
+
+When it came my turn to be the interviewer I wanted to make a good and relevant test of the interviewee's programming skills.  Something that had multiple layers of solutions so that it should be fairly easy for the candidate to get a working solution and then we can see how they build on that solution to build a better solution.  Importantly I wanted this to be a practical test, so that looking at help function or the internet (e.g. StackOverflow) is allowed and encouraged.  And I wanted to see how the candidate works with data, so I included real data in the test.  Like some very large and established companies give you a problem and tell you "Imagine you have some data."  There's a lot you can do with real data to give you perspective and ideas. And to be honest I can never remember the exact syntax of a lot of functions, so I'm constantly using help functions or looking at  documentation. 
+
+A standard problem we encounter is how to handle and process different types of CRISPR-based screens.  If wet lab scientists start using a different Cas protein, or invent some new type of screen, or who knows what else that standard tools such as Mageck won't be able to handle, then the Bio Data Science team needs to be able to develop a way to process and analyse that data, and hopefully quickly.  That is why I chose guide RNA (or spacer, I use the terms interchangeably) counting as the background for our technical coding exam.   
+
+
+# Problem Statement
+
+The goal of this question is to assess the candidate's familiarity with sequence algorithms and Python programming skill.  Accordingly there are several levels to the solution of this problem.  
+
+## Problem description
+
+Input: 
+
+- $3^{\prime}$ scaffold sequence: GTTTAAGAGCTAAGCTGGAAACAGCATAGCAAGTTTAAATAAGGCTAGTCCGTTATCAACTTGAAAAAGTGGCACCGAGTCGGTGCTTTTTTT;
+- Promoter sequence: TTTTTTG;
+- text file of spacer sequences: `guide_RNA_seq.txt`;
+- fastq files of sequenced guide RNAs: `sequenced_guides.fastq`.   We can assume that we are only working with the actual sequence parts of the fastq files and ignore quality scores.
+
+A sequenced guide RNA should (in theory) have the promoter sequence followed by the spacer sequence, then the $3^{\prime}$ scaffold sequence, flanked on other sides by other stuff. This other stuff doesn't matter but is sequenced anyways because the length of the promoter + spacer + scaffold  is much smaller than the length of a standard read. 
+
+![An example of a functional guide RNA and a sequenced read corresponding to the spacer.](ExampleSpacerSeq.png)
+
+The goal of the problem is to produce a count of the number of times each spacer is sequenced.  Note that each sequenced read should only have one spacer.
+
+# Data
+
+Let's take a look at the data provided.
+
+```{bash}
+head guide_RNA_seq.txt
+```
+
+```{bash}
+head sequenced_guides.fastq
+```
+
+```{bash}
+# apparently grep color doesn't work in markdown.  It's tagging the colored sequence with '[01;31m[K'
+grep --color=always -E 'GTTTAAGAGCTAAGCTGG|TTTG' sequenced_guides.fastq | head -4
+```
+
+# Solution
+
+So the first part of finding a solution is how to read a fastq file and extract the sequences of the fastq file (since that's all we really care about).  If the candidate knows biopython, then they can use `SeqIO.read` to read in the file and then extract the sequences.  Another way is to extract every line that is 2 mod 4.  The most popular solution, and incidentally my solution, was to search the internet on how to read a fastq file.  The top result is a Biostars post (https://www.biostars.org/p/317524/) that has a clean solution and can be easily modified to only extract the sequence. 
+
+Here's my solution based off of the above Biostars post
+```{python eval=F}
+import sys
+import os
+
+def process_read(lines=None):
+    ks = ['name', 'sequence', 'optional', 'quality']
+    return {k: v for k, v in zip(ks, lines)}
+
+def get_sequence(fastq_file):
+  # check if file exists
+  if not os.path.exists(fn):
+      raise SystemError("Error: File does not exist.  Check spelling? ¯\_(ツ)_/¯ \n")
+  
+  seqs = []
+  n_lines_per_record = 4
+  with open(fastq_file, 'r') as fh:
+    lines = []
+    for line in fh:
+        lines.append(line.rstrip())
+        if len(lines) == n_lines_per_record:
+            record = process_read(lines)
+            seqs.append(record['sequences])
+            lines = []
+            
+  return seqs
+```
+
+## Naive solution
+
+Once the sequences are extracted then the next step is to count.  The naive solution is to use regular expressions to search each sequence for each guide RNA (or spacer, I'll use the terms interchangeably).  This has a time complexity of $O(n \cdot m \cdot l)$, where $n$ is the number of sequenced reads, $m$ is the number of spacers, and $l$ is the length of the read.  One advantage of this approach is that you don't have to deal with processing the sequences first.  
+
+```{python eval=F}
+import re
+import sys
+import pandas as pd
+
+spacer_df = pd.read_csv('guide_RNA_seq.txt', header = None, names = 'spacer')
+spacer_df['count'] = 0
+
+fastq_file = 'sequenced_guides.fastq'
+file = open(fastq_file, "r")
+
+for line in file:
+  for i in range(spacer_df.shape[0]):
+    s = spacer_df['spacer'][i]
+    if re.search(s, line):
+      spacer_df.loc['count', i] = spacer_df.loc['count', i] + 1
+```
+
+## Better solution
+
+The candidate should recognize that the extra information provided helps, specifically that the spacer sequence should be flanked by promoter sequence and the scaffold sequence.  We can scan the read, look for a part of the promoter sequence then look 20 base pairs after the promoter sequence and check if that matches the scaffold sequence.  Now we have a 20 character sequence that we can match against the spacer sequences.  To make matching easy we can make a hash table of the spacer sequences, which will result in an initial cost of $O(m)$ in making the hash table and then the amortized cost of each search is $O(1)$.  Therefore the total time complexity is $O(m + n \cdot l)$.  
+
+```{python eval=F}
+import re
+import sys
+import pandas as pd
+
+spacer_file = 'guide_RNA_seq.txt'
+spacer_list = []
+with open(spacer_file, 'r') as file:
+  for line in file:
+    spacer_list.append(line.rstrip())
+
+fastq_file = 'sequenced_guides.fastq'
+seqs = get_sequence(fastq_file)
+
+scaffold_seq = 'GTTTAAGAGCTAAGCTGGA'
+spacer_len = 20
+
+spacer_dict = dict.fromkeys(spacer_list, 0)
+
+for s in seqs:
+  # find position of scaffold
+  scaff_pos = re.search(scaffold_seq, s).start()
+  spacer_pos = scaff_pos - spacer_len
+  # make sure it's valid
+  if spacer_pos >= 0:
+    test_spacer = seq[spacer_pos:(spacer_pos + spacer_len)]
+    # test if spacer is in set
+    if test_spacer in spacer_dict:
+      spacer_dict[test_spacer] = spacer_dict[test_spacer] + 1
+
+# mapping rate as a check
+print("mapping rate: ", sum(spacer_dict.values())/float(len(seqs)))
+
+out_file = 'counts.txt'
+with open(out_file, 'w') as file:
+  for k, v in spacer_dict.items():
+    file.write('%s:%s\n' % (k, v))
+```
+
+## Adding inexact matching
+
+If the candidate has gotten this far then we can discuss ways to include the possibility of sequencing errors.  If we compute the full (Levenshtein) distance between the proposed spacer and each spacer in the reference, then that's gonna take too long.  One way to speed this up to restrict the edit distance to some low threshold (not more than 2) and then use the pigeonhole principle.  For example, if we restrict a match to have an edit distance of 1 and you divide the read into two halves, then one half has to match exactly.  Therefore you can build two hash tables of the two halves, and then compute the edit distance for only those reads that have at least one half matching exactly.  Another solution a candidate proposed was a tree-based algorithm, where you build a tree of the reference spacers then do a depth-first search limited to 1 or two mismatches.  I had not thought of that solution and was impressed the candidate could explain it to me clearly.  
