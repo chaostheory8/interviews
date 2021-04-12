@@ -250,7 +250,7 @@ def get_sequence(fastq_file):
         lines.append(line.rstrip())
         if len(lines) == n_lines_per_record:
             record = process_read(lines)
-            seqs.append(record[&#39;sequences])
+            seqs.append(record[&#39;sequences&#39;])
             lines = []
             
   return seqs</code></pre>

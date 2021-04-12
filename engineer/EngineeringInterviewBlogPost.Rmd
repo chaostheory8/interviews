@@ -76,7 +76,7 @@ def get_sequence(fastq_file):
         lines.append(line.rstrip())
         if len(lines) == n_lines_per_record:
             record = process_read(lines)
-            seqs.append(record['sequences])
+            seqs.append(record['sequences'])
             lines = []
             
   return seqs
