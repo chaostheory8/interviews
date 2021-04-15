@@ -166,14 +166,14 @@ pre code {
 
 <h1 class="title toc-ignore">Technical skills test for Bioinformatics Engineer at EpiC Bio</h1>
 <h4 class="author">Timothy Daley</h4>
-<h4 class="date">4/6/2021</h4>
 
 </div>
 
 
-<p>A major problem in interviewing is how to make a practical and relevant test of the candidate’s skills. Especially for programming and data science. This is why a lot of companies offload this test to known solutions such as LeetCode. But this also goes the other way, in that the interview reflects on the values of the company to the candidate. When I was interviewing, when I saw a company that uses a generic service for their test that was an indication that they had not put much thought into their practices. The company that I ended up working for really impressed me with their interview, and that was one of the major reasons I took their offer.</p>
-<p>When it came my turn to be the interviewer I wanted to make a good and relevant test of the interviewee’s programming skills. Something that had multiple layers of solutions so that it should be fairly easy for the candidate to get a working solution and then we can see how they build on that solution to build a better solution. Importantly I wanted this to be a practical test, so that looking at help function or the internet (e.g. StackOverflow) is allowed and encouraged. And I wanted to see how the candidate works with data, so I included real data in the test. Like some very large and established companies give you a problem and tell you “Imagine you have some data.” There’s a lot you can do with real data to give you perspective and ideas. And to be honest I can never remember the exact syntax of a lot of functions, so I’m constantly using help functions or looking at documentation.</p>
-<p>A standard problem we encounter is how to handle and process different types of CRISPR-based screens. If wet lab scientists start using a different Cas protein, or invent some new type of screen, or who knows what else that standard tools such as Mageck won’t be able to handle, then the Bio Data Science team needs to be able to develop a way to process and analyse that data, and hopefully quickly. That is why I chose guide RNA (or spacer, I use the terms interchangeably) counting as the background for our technical coding exam.</p>
+<p>A major and difficult problem in interviewing is how to make a practical and relevant test of the candidate’s skills. Especially for data science and sotware engineering, where we want to assess the candidate’s reasoning skills. The ideal problem is therefore one they have not encountered before (because then it wouldn’t test their reasoning skills, but rather their memorization skills), and one that has several levels of answers. Both are difficult to achieve, which is why a lot of companies offload this test to known solutions such as LeetCode.</p>
+<p>But interviews go both ways, in that not only is the company interviewing the candidate but also that the candidate is interviewing the company. In this way, the technical test reflects on the values of the company to the candidate. In my opinion, a generic test indicates that the company has not thought about the problems that they encounter (or will encounter). Indeed, the company that I went with right after my postdoc impressed me tremendously with their interview, and that was the primary factor in accepting their offer.</p>
+<p>When it came my turn to be the interviewer I really wanted to try to make the test reflect a real problem we might encounter. Importantly I wanted this to be a practical test, so that looking at help function or the internet (e.g. StackOverflow) is allowed and encouraged. And I wanted to see how the candidate works with data, so I included real data in the test. There’s an aspect of understanding the concrete aspects of the problem when you can actually look at the input. It’s difficult to get this when the problem is presented in theory, like “imagine we had data”.</p>
+<p>A problem we encounter regularly is how to process sequencing data from different types of CRISPR-based screens. If our wet lab scientist want to use a new type of Cas protein or invents a new type of screen, then we will need some way to process the data quickly and efficiently, and standard tools can typically only handle Cas9-based screens. That is why I chose guide RNA (or spacer, I use the terms interchangeably) counting as the background for our technical coding exam. In addition, there’s several layers of the problem, because of the trade off between error tolerance and time complexity.</p>
 <div id="problem-statement" class="section level1">
 <h1>Problem Statement</h1>
 <p>The goal of this question is to assess the candidate’s familiarity with sequence algorithms and Python programming skill. Accordingly there are several levels to the solution of this problem.</p>
@@ -219,7 +219,7 @@ pre code {
 ## BBBBBFFFFFFFFFF&lt;FFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFBFFBFFFFFFFFFFFFFFFFF&lt;FFFBFB/&lt;FBFFFFFFFFBFBFF/FFFFFFFFBFBFFFFFBFFF
 ## @CP009257.1_2_0/1
 ## AATGTATCGTTTTTTGGCTTAAGTCACTGCAGCCAGGTTTAAGAGCTAAGCTGGAAACAGCATAGCAAGTTTAAATAAGGCTAGTCCGTTATCAACTTGAAAAAGTGGCACCGAGTCGGTGCTTTTTTT</code></pre>
-<pre class="bash"><code># apparently grep color doesn&#39;t work in markdown.  It&#39;s tagging the colored sequence with &#39;[01;31m[K&#39;
+<pre class="bash"><code># apparently grep color doesn&#39;t work in markdown.  It&#39;s tagging the colored sequence with &#39;[01;31m[K&#39;
 grep --color=always -E &#39;GTTTAAGAGCTAAGCTGG|TTTG&#39; sequenced_guides.fastq | head -4</code></pre>
 <pre><code>## AGCTAAACTCAATGTAAATGCACAAAATAATTGGTTAAATCCTGTTAGTCGAGAAATTCAGTCAACTACACCACTCCG[01;31m[KTTTG[m[KAGTTTTTCAAATAATCCAAACGAAGATCTACAGATTTATCAAGG
 ## TGTGTGCTCAAGTTTT[01;31m[KTTTG[m[KAAGTGAGCTCTTACGGGAAT[01;31m[KGTTTAAGAGCTAAGCTGG[m[KAAACAGCATAGCAAGTTTAAATAAGGCTAGTCCGTTATCAACTTGAAAAAGTGGCACCGAGTCGGTGCTTTTTTT
@@ -239,7 +239,7 @@ def process_read(lines=None):
 
 def get_sequence(fastq_file):
   # check if file exists
-  if not os.path.exists(fn):
+  if not os.path.exists(fastq_file):
       raise SystemError(&quot;Error: File does not exist.  Check spelling? ¯\_(ツ)_/¯ \n&quot;)
   
   seqs = []
@@ -250,10 +250,14 @@ def get_sequence(fastq_file):
         lines.append(line.rstrip())
         if len(lines) == n_lines_per_record:
             record = process_read(lines)
-            seqs.append(record[&#39;sequences&#39;])
+            seqs.append(record[&#39;sequence&#39;])
             lines = []
             
-  return seqs</code></pre>
+  return seqs
+
+s = get_sequence(&quot;sequenced_guides.fastq&quot;)
+s[0:5]</code></pre>
+<pre><code>## [&#39;AGCTAAACTCAATGTAAATGCACAAAATAATTGGTTAAATCCTGTTAGTCGAGAAATTCAGTCAACTACACCACTCCGTTTGAGTTTTTCAAATAATCCAAACGAAGATCTACAGATTTATCAAGG&#39;, &#39;TGTGTGCTCAAGTTTTTTTGAAGTGAGCTCTTACGGGAATGTTTAAGAGCTAAGCTGGAAACAGCATAGCAAGTTTAAATAAGGCTAGTCCGTTATCAACTTGAAAAAGTGGCACCGAGTCGGTGCTTTTTTT&#39;, &#39;AATGTATCGTTTTTTGGCTTAAGTCACTGCAGCCAGGTTTAAGAGCTAAGCTGGAAACAGCATAGCAAGTTTAAATAAGGCTAGTCCGTTATCAACTTGAAAAAGTGGCACCGAGTCGGTGCTTTTTTT&#39;, &#39;TTTTTTTTTTTTGGCATTTTGATTAACGAATGTGTTTAAGAGCTAAGCTGGAAACAGCATAGCAAGTTTAAATAAGGCTAGTCCGTTATCAACTTGAAAAAGTGGCACCGAGTCGGTGCTTTTTTT&#39;, &#39;ACCCACATTCGGCATATATTTTTTGTCGTCAACCTTTCCTGGCCCGTTTAAGAGCTAAGCTGGAAACAGCATAGCAAGTTTAAATAAGGCTAGTCCGTTATCAACTTGAAAAAGTGGCACCGAGTCGGTGCTTTTTTT&#39;]</code></pre>
 <div id="naive-solution" class="section level2">
 <h2>Naive solution</h2>
 <p>Once the sequences are extracted then the next step is to count. The naive solution is to use regular expressions to search each sequence for each guide RNA (or spacer, I’ll use the terms interchangeably). This has a time complexity of <span class="math inline">\(O(n \cdot m \cdot l)\)</span>, where <span class="math inline">\(n\)</span> is the number of sequenced reads, <span class="math inline">\(m\)</span> is the number of spacers, and <span class="math inline">\(l\)</span> is the length of the read. One advantage of this approach is that you don’t have to deal with processing the sequences first.</p>
@@ -261,7 +265,7 @@ def get_sequence(fastq_file):
 import sys
 import pandas as pd
 
-spacer_df = pd.read_csv(&#39;guide_RNA_seq.txt&#39;, header = None, names = &#39;spacer&#39;)
+spacer_df = pd.read_csv(&#39;guide_RNA_seq.txt&#39;, header = None, names = [&#39;spacer&#39;])
 spacer_df[&#39;count&#39;] = 0
 
 fastq_file = &#39;sequenced_guides.fastq&#39;
@@ -271,7 +275,16 @@ for line in file:
   for i in range(spacer_df.shape[0]):
     s = spacer_df[&#39;spacer&#39;][i]
     if re.search(s, line):
-      spacer_df.loc[&#39;count&#39;, i] = spacer_df.loc[&#39;count&#39;, i] + 1</code></pre>
+      spacer_df.loc[i, &#39;count&#39;] = spacer_df.loc[i, &#39;count&#39;] + 1
+
+      
+spacer_df.head()</code></pre>
+<pre><code>##                  spacer  count
+## 0  AAGTGAGCTCTTACGGGAAT     29
+## 1  GAATGTAGTTTTAGCCCTCC     16
+## 2  GGGATTCTATTTAGCCCGCC     17
+## 3  TCTGATGATACCCATGCCAC     25
+## 4  AGATTCACAGAGGCAACCTG     28</code></pre>
 </div>
 <div id="better-solution" class="section level2">
 <h2>Better solution</h2>
@@ -296,27 +309,36 @@ spacer_dict = dict.fromkeys(spacer_list, 0)
 
 for s in seqs:
   # find position of scaffold
-  scaff_pos = re.search(scaffold_seq, s).start()
+  # will return -1 if not found
+  scaff_pos = s.find(scaffold_seq)
   spacer_pos = scaff_pos - spacer_len
   # make sure it&#39;s valid
   if spacer_pos &gt;= 0:
-    test_spacer = seq[spacer_pos:(spacer_pos + spacer_len)]
+    test_spacer = s[spacer_pos:(spacer_pos + spacer_len)]
     # test if spacer is in set
     if test_spacer in spacer_dict:
       spacer_dict[test_spacer] = spacer_dict[test_spacer] + 1
 
 # mapping rate as a check
-print(&quot;mapping rate: &quot;, sum(spacer_dict.values())/float(len(seqs)))
-
-out_file = &#39;counts.txt&#39;
-with open(out_file, &#39;w&#39;) as file:
-  for k, v in spacer_dict.items():
-    file.write(&#39;%s:%s\n&#39; % (k, v))</code></pre>
+print(&quot;mapping rate: &quot;, sum(spacer_dict.values())/float(len(seqs)))</code></pre>
+<pre><code>## mapping rate:  0.8157894736842105</code></pre>
+<pre class="python"><code>counts_df = pd.DataFrame(spacer_dict.items(), columns = [&#39;seq&#39;, &#39;count&#39;])
+counts_df.head()</code></pre>
+<pre><code>##                     seq  count
+## 0  AAGTGAGCTCTTACGGGAAT     29
+## 1  GAATGTAGTTTTAGCCCTCC     16
+## 2  GGGATTCTATTTAGCCCGCC     17
+## 3  TCTGATGATACCCATGCCAC     25
+## 4  AGATTCACAGAGGCAACCTG     28</code></pre>
 </div>
 <div id="adding-inexact-matching" class="section level2">
 <h2>Adding inexact matching</h2>
-<p>If the candidate has gotten this far then we can discuss ways to include the possibility of sequencing errors. If we compute the full (Levenshtein) distance between the proposed spacer and each spacer in the reference, then that’s gonna take too long. One way to speed this up to restrict the edit distance to some low threshold (not more than 2) and then use the pigeonhole principle. For example, if we restrict a match to have an edit distance of 1 and you divide the read into two halves, then one half has to match exactly. Therefore you can build two hash tables of the two halves, and then compute the edit distance for only those reads that have at least one half matching exactly. Another solution a candidate proposed was a tree-based algorithm, where you build a tree of the reference spacers then do a depth-first search limited to 1 or two mismatches. I had not thought of that solution and was impressed the candidate could explain it to me clearly.</p>
+<p>If the candidate has gotten this far then we can discuss ways to include the possibility of sequencing errors. If we compute the full (Levenshtein) distance between the proposed spacer and each spacer in the reference, then we have to compute that for all proposed spacers against all reference spacers, which will take way too long. One way to speed this up to restrict the edit distance to some low threshold (not more than 2) and then use the pigeonhole principle. For example, if we restrict a match to have an edit distance of 1 and you divide the read into two halves, then one half has to match exactly. Therefore you can build two hash tables of the two halves, and then compute the edit distance for only those reads that have at least one half matching exactly. Another solution a candidate proposed was a tree-based algorithm, where you build a tree of the reference spacers then do a depth-first search limited to 1 or two mismatches. I had not thought of that solution and was impressed the candidate could explain it to me clearly.</p>
 </div>
+</div>
+<div id="opportunities-at-epic-bio" class="section level1">
+<h1>Opportunities at Epic Bio</h1>
+<p>I hope that you enjoyed the problem and description. We’re looking for talented early career data scientists here at Epic. If you enjoyed this explanation of the problem and you’re interested in helping to build a CRISPR-modulation-based screening platform, please send a resume to <a href="mailto:recruiting@epic-bio.com" class="email">recruiting@epic-bio.com</a></p>
 </div>
 
 
