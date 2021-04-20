@@ -19,11 +19,11 @@ use_python(python_path)
 
 A major and difficult problem in interviewing is how to make a practical and relevant test of the candidate's skills.  Especially for data science and software engineering, where we want to assess the candidate's reasoning skills.  The ideal problem is therefore one they have not encountered before (because then it wouldn't test their reasoning skills, but rather their memorization skills), and one that has several levels of answers.  Both are difficult to achieve, which is why a lot of companies offload this test to known solutions such as LeetCode.  
 
-But interviews go both ways, in that not only is the company interviewing the candidate but also that the candidate is interviewing the company.  In this way, the technical test reflects on the values of the company to the candidate.  In my opinion, a generic test indicates that the company has not thought about the problems that they encounter (or will encounter).  Indeed, the company that I went with right after my postdoc impressed me tremendously with their interview, and that was the primary factor in accepting their offer.  
+But interviews go both ways, in that not only is the company interviewing the candidate but also that the candidate is interviewing the company.  In this way, the technical test can give the candidate insight into the values of the company.  In my opinion, a generic test indicates that the company has not thought about the problems that they encounter (or will encounter).  Indeed, the company that I went with right after my postdoc impressed me tremendously with their interview, and that was the primary factor in accepting their offer.  
 
-When it came my turn to be the interviewer I really wanted to try to make the test reflect a real problem we might encounter.  Importantly I wanted this to be a practical test, so that looking at help function or the internet (e.g. StackOverflow) is allowed and encouraged.  And I wanted to see how the candidate works with data, so I included real data in the test.  There's an aspect of understanding the concrete characteristics of the problem when you can actually look at the input.  It's difficult to get this when the problem is presented in theory, like "imagine we had data".
+When it came my turn to be the interviewer I really wanted to try to make the test reflect a real problem we might encounter.  Importantly I wanted this to be a practical test, so that looking at help function or the internet (e.g. StackOverflow or BioStars) is allowed and encouraged.  And I wanted to see how the candidate works with data, so I included real data in the test.  There's an aspect of understanding the concrete characteristics of the problem when you can actually look at the input.  It's difficult to get this when the problem is presented in theory, like "imagine we had data".
 
-A problem we encounter regularly is how to process sequencing data from different types of CRISPR-based screens.  If our wet lab scientists want to use a new type of Cas protein or invent a new type of screen, then we will need some way to process the data quickly and efficiently, and standard tools can typically only handle Cas9-based screens.  That is why I chose guide RNA (or spacer, I use the terms interchangeably) counting as the background for our technical coding exam.   In addition, there are several layers of the problem, because of the trade off between error tolerance and time complexity.  
+Here at Epic Bio we are working on developing CRISPR-based therapies.  A problem we regularly encounter is how to process sequencing data from different types of CRISPR-based screens.  If our wet lab scientists want to use a new type of Cas protein or invent a new type of screen, then we will need some way to process the data quickly and efficiently, and standard tools can typically only handle Cas9-based screens.  That is why I chose guide RNA (or spacer, I use the terms interchangeably) counting as the background for our technical coding exam.   In addition, there are several layers of the problem, because of the trade off between error tolerance and time complexity.  
 
 # Problem Statement
 
@@ -46,12 +46,14 @@ The goal of the problem is to produce a count of the number of times each spacer
 
 # Data
 
-Let's take a look at the data provided.
+We provide the following data:
 
+- a text file of spacer sequences, each 20 base pairs long;
 ```{bash}
 head guide_RNA_seq.txt
 ```
 
+- fastq file of sequenced guides (simulated) that correspond to the output of the (theoretical experiment).
 ```{bash}
 head sequenced_guides.fastq
 ```
@@ -170,4 +172,4 @@ If the candidate has gotten this far then we can discuss ways to include the pos
 
 # Opportunities at Epic Bio
 
-I hope that you enjoyed the problem and description.  We're looking for talented early career data scientists here at Epic.  If you enjoyed this explanation of the problem and you're interested in helping to build a CRISPR-modulation-based screening platform, please send a resume to <recruiting@epic-bio.com>
+I hope that you enjoyed the problem and description.  The Biological Data Science team here at Epic is trying build machine learning tools for the analysis of CRISPR-based screens and target identification   We're looking for  early career data scientists that might be interested in these problems, particularly with working complex data to try improve human health.  If you enjoyed this problem and you're interested in helping to build a platform for CRISPR modulation-based therapies, please take a look at the job description [posted at ISCB](https://careers.iscb.org/jobs/view/7551).
