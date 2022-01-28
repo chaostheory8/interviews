@@ -1,0 +1,74 @@
+---
+title: "Simulation for Protein Data Scientist Interview"
+author: "Timothy Daley"
+date: "1/13/2022"
+output: html_document
+---
+
+
+This is gonna generate simulated data for the technical interview for our open position of Data Scientist, Protein Engineering.  It's gonna closely follow the design of the effector screen.
+
+```{r}
+gene_list = read.table(file = "subcell_location_Nucleoplasm_Nuclear.txt", header = T, sep = '\t')
+head(gene_list, 1)
+dim(gene_list)
+```
+
+We'll go directly to the peptide sequence.
+
+```{r message=F}
+library(biomaRt)
+ensembl = useEnsembl(biomart = "genes", dataset = "hsapiens_gene_ensembl")
+protein_seq = getSequence(id=gene_list$Ensembl, type="ensembl_gene_id", seqType="peptide",  mart=ensembl)
+head(protein_seq, 1)
+dim(protein_seq)
+```
+
+Now split up the sequence.
+
+```{r}
+split_overlapping_seq <- function(seq, overlap = seq_overlap, len = seq_len){
+  seq_chars = seqinr::s2c(seq)
+  if(length(seq_chars) < len){
+    return(data.frame(seq = c()))
+  }
+  combined_split = seqinr::splitseq(seq_chars, frame = 0, word = len)
+  # need to add hanging end
+  if(length(seq_chars) > length(combined_split)*len){
+    combined_split = c(combined_split, paste0(seq_chars[(length(seq_chars) - (len - 1)):length(seq_chars)], collapse = ""))
+  }
+  # add other splits
+  n_splits = ceiling(len/overlap)
+  stopifnot(n_splits >= 2)
+  for(i in range(2:n_splits)){
+    next_split = seqinr::splitseq(seq_chars, frame = len - (i - 1)*overlap, word = len)
+  # do we need the other hanging end?  I don't think so
+    combined_split = c(combined_split, next_split)
+  }
+  
+  return(data.frame(seq = combined_split))
+}
+
+split_seqs = data.frame(ensembl_gene_id = c(), split_peptide_seq = c())
+for(i in 1:dim(protein_seq)[1]){
+  s = protein_seq$peptide[i]
+  s_split = split_overlapping_seq(s, overlap = 20, len = 60)
+  if(dim(s_split)[1] > 0){
+    split_seqs = data.frame(ensembl_gene_id = c(split_seqs$ensembl_gene_id, rep(protein_seq$ensembl_gene_id[i], times = dim(s_split)[1])),
+                            split_peptide_seq = c(split_seqs$split_peptide_seq, s_split$seq))
+  }
+}
+head(split_seqs)
+dim(split_seqs)
+```
+
+```{r}
+# drop sequences that aren't long enough
+split_seqs = split_seqs[which(sapply(split_seqs$split_peptide_seq, nchar) == 60), ]
+dim(split_seqs)
+```
+
+```{r}
+# print out table
+write.table(split_seqs, file = "nuclear_peptides_split.txt", col.names = T, sep = '\t', quote = F, row.names = F)
+```
